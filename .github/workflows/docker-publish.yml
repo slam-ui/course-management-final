@@ -1,0 +1,43 @@
+name: Docker CI
+
+# Запускать конвейер при каждом push в ветку main
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-push:
+    # Запускать на виртуальной машине с Ubuntu
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Скачиваем код из репозитория
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. Устанавливаем Java 17 для сборки проекта
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      # 3. Собираем проект с помощью Maven
+      - name: Build with Maven
+        run: mvn clean package
+
+      # 4. Логинимся в GitHub Container Registry
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.CR_PAT }}
+
+      # 5. Собираем и публикуем Docker-образ
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/slam-ui/course-management-final:latest
