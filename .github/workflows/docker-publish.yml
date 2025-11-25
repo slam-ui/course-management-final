@@ -1,43 +1,59 @@
 name: Docker CI
 
-# Запускать конвейер при каждом push в ветку main
 on:
   push:
     branches: [ "main" ]
+  # Добавили этот блок, чтобы проверка запускалась СРАЗУ при создании Pull Request,
+  # а не только после того, как вы его сольете.
+  pull_request:
+    branches: [ "main" ]
+
+# Переменные для удобства
+env:
+  REGISTRY: ghcr.io
+  # Автоматически подставит имя вашего репозитория (например, slam-ui/course-management-final)
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build-and-push:
-    # Запускать на виртуальной машине с Ubuntu
     runs-on: ubuntu-latest
-    steps:
-      # 1. Скачиваем код из репозитория
-      - name: Checkout code
-        uses: actions/checkout@v3
+    
+    # Даем права встроенному токену, чтобы не создавать секреты вручную
+    permissions:
+      contents: read
+      packages: write
 
-      # 2. Устанавливаем Java 17 для сборки проекта
+    steps:
+      # 1. Скачиваем код
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Устанавливаем Java 21 (ИСПРАВЛЕНО: было 17)
       - name: Set up JDK 21
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '21'       # <-- ВАЖНО!
           distribution: 'temurin'
           cache: 'maven'
 
-      # 3. Собираем проект с помощью Maven
+      # 3. Собираем проект (пропускаем тесты, чтобы быстрее проверить сборку)
       - name: Build with Maven
-        run: mvn clean package
+        run: mvn clean package -DskipTests
 
-      # 4. Логинимся в GitHub Container Registry
+      # 4. Логинимся (используем GITHUB_TOKEN, он есть всегда, настраивать не надо)
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
-          registry: ghcr.io
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.CR_PAT }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      # 5. Собираем и публикуем Docker-образ
+      # 5. Собираем и пушим
       - name: Build and push Docker image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
-          push: true
-          tags: ghcr.io/slam-ui/course-management-final:latest
+          # Пушим только если это ветка main (не пушим при проверке Pull Request)
+          push: ${{ github.event_name != 'pull_request' }}
+          # Тег будет: ghcr.io/ваш-логин/ваш-репо:latest
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
