@@ -1,59 +1,31 @@
-name: Docker CI
+name: Java CI with Maven
+
 
 on:
   push:
     branches: [ "main" ]
-  # Добавили этот блок, чтобы проверка запускалась СРАЗУ при создании Pull Request,
-  # а не только после того, как вы его сольете.
   pull_request:
     branches: [ "main" ]
 
-# Переменные для удобства
-env:
-  REGISTRY: ghcr.io
-  # Автоматически подставит имя вашего репозитория (например, slam-ui/course-management-final)
-  IMAGE_NAME: ${{ github.repository }}
-
 jobs:
-  build-and-push:
+
+  build:
+
     runs-on: ubuntu-latest
-    
-    # Даем права встроенному токену, чтобы не создавать секреты вручную
-    permissions:
-      contents: read
-      packages: write
+
+    container: maven:3.9-eclipse-temurin-21
 
     steps:
-      # 1. Скачиваем код
+
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Устанавливаем Java 21 (ИСПРАВЛЕНО: было 17)
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'       # <-- ВАЖНО!
-          distribution: 'temurin'
-          cache: 'maven'
-
-      # 3. Собираем проект (пропускаем тесты, чтобы быстрее проверить сборку)
       - name: Build with Maven
         run: mvn clean package -DskipTests
 
-      # 4. Логинимся (используем GITHUB_TOKEN, он есть всегда, настраивать не надо)
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
         with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      # 5. Собираем и пушим
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          # Пушим только если это ветка main (не пушим при проверке Pull Request)
-          push: ${{ github.event_name != 'pull_request' }}
-          # Тег будет: ghcr.io/ваш-логин/ваш-репо:latest
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          name: course-management-jar
+          path: target/*.jar
+          retention-days: 5
