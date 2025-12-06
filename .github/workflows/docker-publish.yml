@@ -1,20 +1,17 @@
 name: Java CI with Maven
 
-
 on:
   pull_request:
     branches: [ "main" ]
+  push:
+    branches: [ "main" ] # Добавил push, чтобы проверка работала и при отправке кода
 
 jobs:
-
+  # Твоя задача сборки (оставил как есть)
   build:
-
     runs-on: ubuntu-latest
-
     container: maven:3.9-eclipse-temurin-21
-
     steps:
-
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -27,3 +24,26 @@ jobs:
           name: course-management-jar
           path: target/*.jar
           retention-days: 5
+
+  # Новая задача SAST (Задание №3)
+  sast:
+    needs: build # 1. Запускается СТРОГО после сборки
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Запуск сканирования Semgrep
+      - name: Semgrep Security Scan
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: p/default
+          generateSarif: "1" # Генерируем отчет для GitHub Security
+
+      # 3. Загрузка результатов в GitHub
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: semgrep.sarif
+        if: always() # Загружать отчет даже если найдены уязвимости
