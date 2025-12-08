@@ -71,7 +71,7 @@
             <plugin>
                 <groupId>org.owasp</groupId>
                 <artifactId>dependency-check-maven</artifactId>
-                <version>10.0.3</version> <!-- Или более новая версия -->
+                <version>11.1.1</version> <!-- Или более новая версия -->
                 <configuration>
                     <formats>
                         <format>HTML</format>
