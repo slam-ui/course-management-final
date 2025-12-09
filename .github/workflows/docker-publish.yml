@@ -72,10 +72,10 @@ jobs:
           path: target/dependency-check-report.html
 
   # 4. DAST (OWASP ZAP) - Задание №5
-dast:
+  dast:
     needs: build
     runs-on: ubuntu-latest
-    # УБРАЛИ: continue-on-error: true (теперь будет красный крестик при уязвимостях)
+    # МЫ УБРАЛИ continue-on-error: true. Теперь задача упадет, если будут ошибки.
     permissions:
       contents: read
       issues: write
@@ -109,7 +109,7 @@ dast:
           rules_file_name: 'zap-rules.tsv'
           allow_issue_writing: false
           cmd_options: '-a'
-          fail_action: true # Явно говорим: "Фейли пайплайн, если есть проблемы"
+          fail_action: true # Явно требуем "фейл" при нахождении проблем
 
       - name: ZAP API Scan
         uses: zaproxy/action-api-scan@v0.10.0
@@ -118,10 +118,10 @@ dast:
           format: 'openapi'
           rules_file_name: 'zap-rules.tsv'
           allow_issue_writing: false
-          fail_action: true # И тут тоже
+          fail_action: true # Явно требуем "фейл" при нахождении проблем
 
       - name: Upload ZAP Reports
-        if: always() # Важно! Загружаем отчет, даже если предыдущие шаги упали
+        if: always() # Загружаем отчет, даже если предыдущие шаги упали (красные)
         uses: actions/upload-artifact@v4
         with:
           name: zap-dast-reports
