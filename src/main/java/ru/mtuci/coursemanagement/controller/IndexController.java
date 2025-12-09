@@ -9,11 +9,9 @@ import ru.mtuci.coursemanagement.service.PluginLoader;
 @Controller
 @RequiredArgsConstructor
 public class IndexController {
-    private final PluginLoader loader;
 
     @GetMapping("/")
     public String index(Model model) {
-        loader.tryLoad();
         return "index";
     }
 }
