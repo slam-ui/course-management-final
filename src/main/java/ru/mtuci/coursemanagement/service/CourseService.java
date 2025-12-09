@@ -32,13 +32,13 @@ public class CourseService {
     }
 
     public List<Course> searchByTitle(String title) {
-    String sql = "SELECT id, title, description, teacher_id FROM courses WHERE title = ?";
-    RowMapper<Course> rm = (rs, i) -> new Course(
-            rs.getLong("id"),
-            rs.getString("title"),
-            rs.getString("description"),
-            rs.getLong("teacher_id")
-    );
-    return jdbc.query(sql, rm, title);
-}
-
+        String sql = "SELECT id, title, description, teacher_id FROM courses WHERE title = ?";
+        RowMapper<Course> rm = (rs, i) -> new Course(
+                rs.getLong("id"),
+                rs.getString("title"),
+                rs.getString("description"),
+                rs.getLong("teacher_id")
+        );
+        return jdbc.query(sql, rm, title);
+    }
+} 
