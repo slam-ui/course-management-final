@@ -3,27 +3,34 @@ spring:
     name: course-management
   h2:
     console:
-      enabled: true
-      path: /h2-console
-      settings:
-        web-allow-others: true
+      enabled: false  # ИСПРАВЛЕНО: отключено в production
+      # path: /h2-console  # удалено
+      # settings:
+      #   web-allow-others: true  # удалено
   datasource:
     url: jdbc:h2:mem:courseapp;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
     password:
   jpa:
-    show-sql: true
+    show-sql: false  # ИСПРАВЛЕНО: отключено в production
     hibernate:
       ddl-auto: update
     defer-datasource-initialization: true
+
 management:
   endpoints:
     web:
       exposure:
-        include: "*"
+        include: health,info  # ИСПРАВЛЕНО: ограничено
+  endpoint:
+    health:
+      show-details: when-authorized
+
 server:
   error:
-    include-stacktrace: ALWAYS
-app:
-  plugin:
-    url:
+    include-stacktrace: never  # ИСПРАВЛЕНО: скрыто в production
+
+# УДАЛЕНО:
+# app:
+#   plugin:
+#     url:
