@@ -8,7 +8,7 @@ on:
 
 jobs:
 
-
+  # 1. Сборка проекта
   build:
     runs-on: ubuntu-latest
     container: maven:3.9-eclipse-temurin-21
@@ -26,11 +26,10 @@ jobs:
           path: target/*.jar
           retention-days: 5
 
-
+  # 2. SAST (Semgrep)
   sast:
     needs: build
     runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -47,7 +46,7 @@ jobs:
           sarif_file: semgrep.sarif
         if: always()
 
-
+  # 3. SCA (Dependency Check)
   dependency-scan:
     needs: build
     runs-on: ubuntu-latest
@@ -62,10 +61,8 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-
       - name: OWASP Dependency Check
         run: mvn org.owasp:dependency-check-maven:check -Dformat=HTML -DsuppressionFile=owasp-suppressions.xml
-
 
       - name: Upload Dependency Check Report
         uses: actions/upload-artifact@v4
@@ -73,3 +70,62 @@ jobs:
         with:
           name: dependency-check-report
           path: target/dependency-check-report.html
+
+  # 4. DAST (OWASP ZAP) - Задание №5
+  dast:
+    needs: build
+    runs-on: ubuntu-latest
+    # МЫ УБРАЛИ continue-on-error: true. Теперь задача упадет, если будут ошибки.
+    permissions:
+      contents: read
+      issues: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: course-management-jar
+          path: target/
+
+      - name: Start Application
+        run: |
+          nohup java -jar target/*.jar > app.log 2>&1 &
+          echo "Application started. Waiting 60 seconds..."
+          sleep 60
+
+      - name: ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.9.0
+        with:
+          target: 'http://localhost:8080'
+          rules_file_name: 'zap-rules.tsv'
+          allow_issue_writing: false
+          cmd_options: '-a'
+          fail_action: true # Явно требуем "фейл" при нахождении проблем
+
+      - name: ZAP API Scan
+        uses: zaproxy/action-api-scan@v0.10.0
+        with:
+          target: 'http://localhost:8080/v3/api-docs'
+          format: 'openapi'
+          rules_file_name: 'zap-rules.tsv'
+          allow_issue_writing: false
+          fail_action: true # Явно требуем "фейл" при нахождении проблем
+
+      - name: Upload ZAP Reports
+        if: always() # Загружаем отчет, даже если предыдущие шаги упали (красные)
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-dast-reports
+          path: |
+            *.html
+            *.json
+            *.md
