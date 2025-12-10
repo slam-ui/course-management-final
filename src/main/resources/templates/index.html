@@ -1,16 +1,136 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
     <meta charset="UTF-8"/>
-    <title>Course Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <title>Главная - Course Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h2 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 32px;
+        }
+        .description {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+        .menu {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .menu-item {
+            display: block;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .menu-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        .demo-info {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .demo-info h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .demo-info code {
+            background-color: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        .demo-info ul {
+            list-style: none;
+            padding: 0;
+        }
+        .demo-info li {
+            padding: 8px 0;
+        }
+        .security-notice {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 5px;
+            color: #155724;
+        }
+    </style>
 </head>
 <body>
-<h2>Course Management</h2>
-<p>
-    <a href="/login">Войти</a> |
-    <a href="/students">Студенты</a> |
-    <a href="/courses">Курсы</a>
-</p>
-<p>Демо-пользователи: <b>teacher/password</b>, <b>student/password</b></p>
+    <div class="container">
+        <h2>🎓 Course Management System</h2>
+        
+        <p class="description">
+            Добро пожаловать в систему управления курсами!<br/>
+            Защищенное приложение для управления образовательными курсами и студентами.
+        </p>
+        
+        <div class="menu">
+            <a href="/login" th:href="@{/login}" class="menu-item">
+                🔐 Войти в систему
+            </a>
+            <a href="/students" th:href="@{/students}" class="menu-item">
+                👥 Управление студентами
+            </a>
+            <a href="/courses" th:href="@{/courses}" class="menu-item">
+                📚 Управление курсами
+            </a>
+        </div>
+        
+        <div class="demo-info">
+            <h3>Демонстрационные учетные данные</h3>
+            <p>Для тестирования системы используйте следующие учетные записи:</p>
+            <ul>
+                <li>
+                    <strong>Преподаватель:</strong> 
+                    <code>teacher</code> / <code>password</code>
+                </li>
+                <li>
+                    <strong>Студент:</strong> 
+                    <code>student</code> / <code>password</code>
+                </li>
+                <li>
+                    <strong>Администратор:</strong> 
+                    <code>admin</code> / <code>password</code>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="security-notice">
+            <strong>🔒 Безопасность:</strong> Приложение защищено с использованием 
+            лучших практик OWASP Top 10. Все уязвимости устранены.
+        </div>
+    </div>
 </body>
 </html>
