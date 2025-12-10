@@ -64,17 +64,6 @@ public class SecurityConfig {
                 .referrerPolicy(referrer -> referrer
                     .policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)
                 )
-                // Permissions-Policy (Feature-Policy)
-                .permissionsPolicy(permissions -> permissions
-                    .policy("geolocation=(), microphone=(), camera=(), payment=(), usb=(), " +
-                           "magnetometer=(), gyroscope=(), accelerometer=(), interest-cohort=()")
-                )
-                // Cross-Origin заголовки для защиты от Spectre
-                .addHeaderWriter((request, response) -> {
-                    response.setHeader("Cross-Origin-Opener-Policy", "same-origin");
-                    response.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
-                    response.setHeader("Cross-Origin-Resource-Policy", "same-origin");
-                })
             )
             // Session Management с защитой от фиксации сессии
             .sessionManagement(session -> session
