@@ -36,7 +36,7 @@ spring:
     cookie:
       secure: false  # Установите true при использовании HTTPS
       http-only: true
-      same-site: strict
+      same-site: lax  # ИСПРАВЛЕНО: изменено с strict на lax для лучшей совместимости
       max-age: 1800  # 30 минут
   
   # Thymeleaf настройки
@@ -83,7 +83,7 @@ server:
       cookie:
         http-only: true
         secure: false  # Установите true при использовании HTTPS
-        same-site: strict
+        same-site: lax  # ИСПРАВЛЕНО: изменено с strict на lax
   
   # Compression
   compression:
