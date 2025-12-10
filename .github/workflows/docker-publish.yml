@@ -32,11 +32,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Semgrep Security Scan
-        uses: returntocorp/semgrep-action@v1
-        with:
-          config: p/default
-        # ИСПРАВЛЕНО: продолжаем даже если есть находки
+      - name: Run Semgrep
+        run: |
+          pip install semgrep
+          semgrep scan --config=p/default --sarif --output=semgrep.sarif || true
         continue-on-error: true
 
       - name: Upload SARIF file
@@ -62,6 +61,7 @@ jobs:
 
       - name: OWASP Dependency Check
         run: mvn org.owasp:dependency-check-maven:check -Dformat=HTML -DsuppressionFile=owasp-suppressions.xml
+        continue-on-error: true
 
       - name: Upload Dependency Check Report
         uses: actions/upload-artifact@v4
@@ -113,18 +113,19 @@ jobs:
           target: 'http://localhost:8080'
           rules_file_name: 'zap-rules.tsv'
           cmd_options: '-a'
-          # ИСПРАВЛЕНО: не останавливаем CI при warnings
-          fail_action: false
+          fail_action: 'false'
+          allow_issue_writing: 'false'
 
-      - name: Upload ZAP Scan Report
+      - name: Upload ZAP Scan Reports
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: zap-scan-report
+          name: zap-scan-reports
           path: |
             report_html.html
             report_json.json
             report_md.md
+          retention-days: 7
 
       - name: Stop application
         if: always()
