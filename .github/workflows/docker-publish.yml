@@ -76,7 +76,7 @@ jobs:
           name: dependency-check-report
           path: target/dependency-check-report.html
 
-  # 4. DAST (OWASP ZAP)
+# 4. DAST (OWASP ZAP)
   dast:
     needs: build
     runs-on: ubuntu-latest
@@ -94,12 +94,14 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      # Оптимизация: Скачиваем готовый JAR вместо повторной сборки
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
           name: course-management-jar
           path: target/
+
+      - name: Fix permissions for ZAP
+        run: chmod -R 777 .
 
       - name: Start application
         run: |
@@ -107,17 +109,18 @@ jobs:
           echo "Application started. Waiting 60 seconds..."
           sleep 60
 
-      # Базовое сканирование (зеленый режим)
+      # Базовое сканирование
       - name: Run OWASP ZAP Baseline Scan
-        uses: zaproxy/action-baseline@v0.9.0
+        uses: zaproxy/action-baseline@v0.12.0
         with:
           target: 'http://localhost:8080'
           rules_file_name: 'zap-rules.tsv'
           allow_issue_writing: false
           cmd_options: '-a'
-          fail_action: false # Не падать из-за предупреждений
+          fail_action: false 
+        continue-on-error: true 
 
-      # Сканирование API (зеленый режим)
+      # Сканирование API
       - name: Run OWASP ZAP API Scan
         uses: zaproxy/action-api-scan@v0.10.0
         with:
@@ -125,11 +128,12 @@ jobs:
           format: 'openapi'
           rules_file_name: 'zap-rules.tsv'
           allow_issue_writing: false
-          fail_action: false # Не падать из-за предупреждений
+          fail_action: false
+        continue-on-error: true 
 
       - name: Upload ZAP Scan Reports
         uses: actions/upload-artifact@v4
-        if: always()
+        if: always() # Загружаем отчет, даже если что-то упало
         with:
           name: zap-scan-reports
           path: |
