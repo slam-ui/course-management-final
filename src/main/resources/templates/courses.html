@@ -1,25 +1,129 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"/><title>Курсы</title></head>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <title>Курсы - Course Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h3 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        .form-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .nav-links {
+            margin-top: 20px;
+        }
+        .nav-links a {
+            color: #4CAF50;
+            text-decoration: none;
+            margin-right: 15px;
+        }
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
 <body>
-<h3>Курсы</h3>
-<table border="1">
-    <tr><th>ID</th><th>Название</th><th>Описание</th><th>TeacherId</th></tr>
-    <tr th:each="c: ${courses}">
-        <td th:text="${c.id}"></td>
-        <td th:text="${c.title}"></td>
-        <td th:text="${c.description}"></td>
-        <td th:text="${c.teacherId}"></td>
-    </tr>
-</table>
-<hr/>
-<h4>Добавить курс</h4>
-<form method="post" action="/courses">
-    <input name="title" placeholder="Название"/>
-    <input name="description" placeholder="Описание"/>
-    <input name="teacherId" placeholder="teacherId"/>
-    <button type="submit">Сохранить</button>
-</form>
-<p><a href="/">На главную</a></p>
+    <h3>Управление курсами</h3>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Название</th>
+                <th>Описание</th>
+                <th>ID Преподавателя</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="c : ${courses}">
+                <td th:text="${c.id}">1</td>
+                <td th:text="${c.title}">Название курса</td>
+                <td th:text="${c.description}">Описание курса</td>
+                <td th:text="${c.teacherId}">1</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(courses)}">
+                <td colspan="4" style="text-align: center; color: #999;">
+                    Нет доступных курсов
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <div class="form-container">
+        <h4>Добавить новый курс</h4>
+        <!-- ИСПРАВЛЕНО: использование th:action для автоматического добавления CSRF токена -->
+        <form method="post" th:action="@{/courses}">
+            <label for="title">Название курса:</label>
+            <input type="text" id="title" name="title" placeholder="Введите название курса" required maxlength="255"/>
+            
+            <label for="description">Описание:</label>
+            <input type="text" id="description" name="description" placeholder="Введите описание курса" required maxlength="2000"/>
+            
+            <label for="teacherId">ID Преподавателя:</label>
+            <input type="number" id="teacherId" name="teacherId" placeholder="Введите ID преподавателя" required min="1"/>
+            
+            <button type="submit">Сохранить курс</button>
+            <!-- CSRF токен автоматически добавляется Spring Security через Thymeleaf -->
+        </form>
+    </div>
+    
+    <div class="nav-links">
+        <a href="/" th:href="@{/}">← На главную</a>
+        <a href="/students" th:href="@{/students}">Студенты</a>
+        <a href="/logout" th:href="@{/logout}">Выйти</a>
+    </div>
 </body>
 </html>

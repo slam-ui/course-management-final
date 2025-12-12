@@ -1,21 +1,219 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"/><title>Вход</title></head>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <title>Вход - Course Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h3 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        h4 {
+            color: #333;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="password"] {
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 14px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #f5c6cb;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #c3e6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #bee5eb;
+        }
+        hr {
+            margin: 30px 0;
+            border: none;
+            border-top: 1px solid #ddd;
+        }
+        .note {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+            margin-top: 15px;
+        }
+        .demo-accounts {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .demo-accounts h5 {
+            margin-top: 0;
+            color: #333;
+        }
+        .demo-accounts ul {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0 0 0;
+        }
+        .demo-accounts li {
+            padding: 5px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .demo-accounts code {
+            background-color: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .nav-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .nav-link a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        .nav-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
 <body>
-<h3>Вход</h3>
-<form method="post" action="/login">
-    <label>Логин: <input type="text" name="username"/></label><br/>
-    <label>Пароль: <input type="password" name="password"/></label><br/>
-    <button type="submit">Войти</button>
-</form>
-<p th:if="${error}" th:text="${error}"></p>
-<hr/>
-<h4>Регистрация (демо A04: можно указать роль)</h4>
-<form method="post" action="/register">
-    <input name="username" placeholder="username"/>
-    <input name="password" placeholder="password"/>
-    <input name="role" placeholder="role (STUDENT/TEACHER)"/>
-    <button type="submit">Зарегистрироваться</button>
-</form>
+    <div class="container">
+        <h3>🔐 Вход в систему</h3>
+        
+        <!-- Сообщение об ошибке -->
+        <p th:if="${error}" class="error" th:text="${error}">
+            Ошибка входа
+        </p>
+        
+        <!-- Сообщение об успешном выходе -->
+        <p th:if="${param.logout}" class="success">
+            ✓ Вы успешно вышли из системы
+        </p>
+        
+        <!-- Сообщение об успешной регистрации -->
+        <p th:if="${param.registered}" class="success">
+            ✓ Регистрация прошла успешно! Теперь вы можете войти в систему.
+        </p>
+        
+        <!-- Форма входа -->
+        <!-- ИСПРАВЛЕНО: использование th:action для автоматического добавления CSRF токена -->
+        <form method="post" th:action="@{/login}">
+            <label for="username">Логин:</label>
+            <input type="text" id="username" name="username" 
+                   placeholder="Введите логин" required minlength="3" autofocus/>
+            
+            <label for="password">Пароль:</label>
+            <input type="password" id="password" name="password" 
+                   placeholder="Введите пароль" required minlength="6"/>
+            
+            <button type="submit">Войти</button>
+            <!-- CSRF токен автоматически добавляется Spring Security через Thymeleaf -->
+        </form>
+        
+        <hr/>
+        
+        <h4>📝 Регистрация нового пользователя</h4>
+        <!-- ИСПРАВЛЕНО: использование th:action для автоматического добавления CSRF токена -->
+        <!-- ИСПРАВЛЕНО: удален параметр role - все новые пользователи получают роль STUDENT -->
+        <form method="post" th:action="@{/register}">
+            <label for="reg-username">Логин:</label>
+            <input type="text" id="reg-username" name="username" 
+                   placeholder="Выберите логин (минимум 3 символа)" 
+                   required minlength="3" maxlength="50"/>
+            
+            <label for="reg-password">Пароль:</label>
+            <input type="password" id="reg-password" name="password" 
+                   placeholder="Выберите пароль (минимум 6 символов)" 
+                   required minlength="6" maxlength="100"/>
+            
+            <button type="submit">Зарегистрироваться</button>
+            <!-- CSRF токен автоматически добавляется Spring Security через Thymeleaf -->
+        </form>
+        
+        <p class="note">
+            <small>
+                ℹ️ Примечание: Все новые пользователи регистрируются с ролью STUDENT.<br/>
+                Для получения других ролей обратитесь к администратору.
+            </small>
+        </p>
+        
+        <div class="demo-accounts">
+            <h5>🎭 Демонстрационные учетные записи</h5>
+            <ul>
+                <li>👨‍🏫 Преподаватель: <code>teacher</code> / <code>password</code></li>
+                <li>👨‍🎓 Студент: <code>student</code> / <code>password</code></li>
+                <li>👨‍💼 Администратор: <code>admin</code> / <code>password</code></li>
+            </ul>
+        </div>
+        
+        <div class="nav-link">
+            <a href="/" th:href="@{/}">← Вернуться на главную</a>
+        </div>
+    </div>
 </body>
 </html>

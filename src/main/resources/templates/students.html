@@ -1,25 +1,129 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"/><title>Студенты</title></head>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <title>Студенты - Course Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h3 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #2196F3;
+            color: white;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        .form-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        input[type="text"], input[type="email"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #2196F3;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0b7dda;
+        }
+        .nav-links {
+            margin-top: 20px;
+        }
+        .nav-links a {
+            color: #2196F3;
+            text-decoration: none;
+            margin-right: 15px;
+        }
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
 <body>
-<h3>Студенты</h3>
-<table border="1">
-    <tr><th>ID</th><th>Имя</th><th>Email</th><th>UserId</th></tr>
-    <tr th:each="s: ${students}">
-        <td th:text="${s.id}"></td>
-        <td th:text="${s.name}"></td>
-        <td th:text="${s.email}"></td>
-        <td th:text="${s.userId}"></td>
-    </tr>
-</table>
-<hr/>
-<h4>Добавить студента</h4>
-<form method="post" action="/students">
-    <input name="name" placeholder="Имя"/>
-    <input name="email" placeholder="Email"/>
-    <input name="userId" placeholder="userId"/>
-    <button type="submit">Сохранить</button>
-</form>
-<p><a href="/">На главную</a></p>
+    <h3>Управление студентами</h3>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Имя</th>
+                <th>Email</th>
+                <th>ID Пользователя</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="s : ${students}">
+                <td th:text="${s.id}">1</td>
+                <td th:text="${s.name}">Имя студента</td>
+                <td th:text="${s.email}">email@example.com</td>
+                <td th:text="${s.userId}">1</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(students)}">
+                <td colspan="4" style="text-align: center; color: #999;">
+                    Нет зарегистрированных студентов
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <div class="form-container">
+        <h4>Добавить нового студента</h4>
+        <!-- ИСПРАВЛЕНО: использование th:action для автоматического добавления CSRF токена -->
+        <form method="post" th:action="@{/students}">
+            <label for="name">Имя студента:</label>
+            <input type="text" id="name" name="name" placeholder="Введите имя студента" required maxlength="255"/>
+            
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" placeholder="Введите email" required maxlength="255"/>
+            
+            <label for="userId">ID Пользователя (необязательно):</label>
+            <input type="number" id="userId" name="userId" placeholder="Введите ID пользователя" min="1"/>
+            
+            <button type="submit">Сохранить студента</button>
+            <!-- CSRF токен автоматически добавляется Spring Security через Thymeleaf -->
+        </form>
+    </div>
+    
+    <div class="nav-links">
+        <a href="/" th:href="@{/}">← На главную</a>
+        <a href="/courses" th:href="@{/courses}">Курсы</a>
+        <a href="/logout" th:href="@{/logout}">Выйти</a>
+    </div>
 </body>
 </html>

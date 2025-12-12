@@ -1,9 +1,8 @@
 package ru.mtuci.coursemanagement.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder; // <--- ВАЖНО
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import ru.mtuci.coursemanagement.model.User;
 import ru.mtuci.coursemanagement.service.UserService;
 
+import jakarta.servlet.http.HttpServletRequest; // Обратите внимание: jakarta, не javax (для Spring Boot 3)
+import jakarta.servlet.http.HttpSession;
 import java.util.Optional;
 
 @Slf4j
@@ -19,6 +20,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AuthController {
     private final UserService users;
+    private final PasswordEncoder passwordEncoder;
 
     @GetMapping("/login")
     public String loginPage() {
@@ -33,8 +35,10 @@ public class AuthController {
         Optional<User> opt = users.findByUsername(username);
         if (opt.isPresent()) {
             User u = opt.get();
-            if (u.getPassword().equals(password)) {
-                log.info("User {} logged in with password {}", username, password);
+            // ИСПРАВЛЕНО: использование BCrypt для проверки пароля
+            if (passwordEncoder.matches(password, u.getPassword())) {
+                // ИСПРАВЛЕНО: удалено логирование пароля
+                log.info("User {} logged in successfully", username);
                 HttpSession s = req.getSession(true);
                 s.setAttribute("username", username);
                 s.setAttribute("role", u.getRole());
@@ -54,9 +58,10 @@ public class AuthController {
 
     @PostMapping("/register")
     public String register(@RequestParam String username,
-                           @RequestParam String password,
-                           @RequestParam(required = false, defaultValue = "STUDENT") String role) {
-        users.save(new User(null, username, password, role));
+                           @RequestParam String password) {
+        // ИСПРАВЛЕНО: роль всегда STUDENT, параметр role удален
+        String encodedPassword = passwordEncoder.encode(password);
+        users.save(new User(null, username, encodedPassword, "STUDENT"));
         return "redirect:/login";
     }
 }

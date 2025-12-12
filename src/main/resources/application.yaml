@@ -1,29 +1,106 @@
 spring:
   application:
     name: course-management
+  
+  # H2 Database настройки
   h2:
     console:
-      enabled: true
-      path: /h2-console
-      settings:
-        web-allow-others: true
+      # ИСПРАВЛЕНО: отключен H2 Console для production
+      enabled: false
+  
+  # DataSource настройки
   datasource:
     url: jdbc:h2:mem:courseapp;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
     password:
+    driver-class-name: org.h2.Driver
+  
+  # JPA настройки
   jpa:
-    show-sql: true
+    # ИСПРАВЛЕНО: отключен вывод SQL в production
+    show-sql: false
     hibernate:
       ddl-auto: update
     defer-datasource-initialization: true
+    database-platform: org.hibernate.dialect.H2Dialect
+  
+  # Spring Security настройки
+  security:
+    user:
+      name: admin
+      password: changeme
+      roles: ADMIN
+  
+  # ИСПРАВЛЕНО: Настройка Session Cookie с SameSite
+  session:
+    cookie:
+      secure: false  # Установите true при использовании HTTPS
+      http-only: true
+      same-site: lax  # ИСПРАВЛЕНО: изменено с strict на lax для лучшей совместимости
+      max-age: 1800  # 30 минут
+  
+  # Thymeleaf настройки
+  thymeleaf:
+    cache: false  # Отключить кеш для разработки, включить в production
+    encoding: UTF-8
+
+# Actuator настройки
 management:
   endpoints:
     web:
       exposure:
-        include: "*"
+        # ИСПРАВЛЕНО: ограничен список доступных endpoints
+        include: health,info
+      base-path: /actuator
+  endpoint:
+    health:
+      # ИСПРАВЛЕНО: детали здоровья только для авторизованных
+      show-details: when-authorized
+      show-components: when-authorized
+    info:
+      enabled: true
+  
+  # Информация о приложении
+  info:
+    app:
+      name: Course Management System
+      description: Secure course management application
+      version: 0.0.1-SNAPSHOT
+
+# Server настройки
 server:
+  port: 8080
   error:
-    include-stacktrace: ALWAYS
-app:
-  plugin:
-    url:
+    # ИСПРАВЛЕНО: скрыты stack traces в production
+    include-stacktrace: never
+    include-message: always
+    include-binding-errors: always
+  
+  # Настройки сервлета
+  servlet:
+    session:
+      timeout: 30m
+      cookie:
+        http-only: true
+        secure: false  # Установите true при использовании HTTPS
+        same-site: lax  # ИСПРАВЛЕНО: изменено с strict на lax
+  
+  # Compression
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+
+# Logging настройки
+logging:
+  level:
+    root: INFO
+    org.springframework.security: INFO
+    org.springframework.web: INFO
+    ru.mtuci.coursemanagement: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# УДАЛЕНО: app.plugin.url (RCE уязвимость через PluginLoader)
