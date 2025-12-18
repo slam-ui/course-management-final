@@ -7,8 +7,24 @@ on:
     branches: [ "main" ]
 
 jobs:
-  # 1. Сборка (Build)
+  # 1. НОВАЯ ЗАДАЧА: Поиск секретов (Gitleaks)
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Важно! Gitleaks нужно видеть историю коммитов
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Gitleaks автоматически упадет, если найдет секрет
+
+  # 2. Сборка (Build) - ЗАПУСКАЕТСЯ ТОЛЬКО ПОСЛЕ ПРОВЕРКИ СЕКРЕТОВ
   build:
+    needs: secret-scan # <--- ЭТО ВАЖНО: Ждем завершения проверки секретов
     runs-on: ubuntu-latest
     container: maven:3.9-eclipse-temurin-21
     steps:
