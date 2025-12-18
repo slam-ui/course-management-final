@@ -1,5 +1,6 @@
 package ru.mtuci.coursemanagement.controller;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -71,14 +72,5 @@ public class CourseController {
     @ResponseBody
     public List<Course> search(@RequestParam String title) {
         return service.searchByTitle(title);
-    }
-
-    @GetMapping("/api/courses/import")
-    @ResponseBody
-    public String importFromUrl(@RequestParam String url) {
-        RestTemplate rt = new RestTemplate();
-        String json = rt.getForObject(url, String.class);
-        log.info("Импортированы данные курсов (raw): {}", json);
-        return "OK";
     }
 }
